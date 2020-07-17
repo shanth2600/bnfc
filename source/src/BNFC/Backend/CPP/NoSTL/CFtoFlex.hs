@@ -162,16 +162,17 @@ restOfFlex inPackage cf env = unlines $ concat
 -- lexSingleComment or lexMultiComment on each comment delimiter or pair of
 -- delimiters.
 --
--- >>> lexComments (Just "myns.") ([("{-","-}")],["--"])
+-- >>> lexComments (Just "myns.") ([("{-","-}")],["--"],[])
 -- <YYINITIAL>"--"[^\n]* ; // BNFC: comment "--";
 -- <YYINITIAL>"{-" BEGIN COMMENT; // BNFC: block comment "{-" "-}";
 -- <COMMENT>"-}" BEGIN YYINITIAL;
 -- <COMMENT>.    /* skip */;
 -- <COMMENT>[\n] ++myns.yy_mylinenumber;
-lexComments :: Maybe String -> ([(String, String)], [String]) -> Doc
-lexComments ns (m,s) = vcat $ concat
+lexComments :: Maybe String -> ([(String, String)], [String], [(String, String)]) -> Doc
+lexComments ns (m,s,n) = vcat $ concat
   [ map    (lexSingleComment ns) s
   , zipWith (lexMultiComment ns) m commentStates
+  , map (lexNestedComment ns) n
   ]
 
 -- | Create a lexer rule for single-line comments.
@@ -247,6 +248,12 @@ lexMultiComment ns (b,e) comment = vcat
     ]
   where
   commentTag = text $ "<" ++ comment ++ ">"
+
+lexNestedComment _ (b,e) = vcat [
+    ("<YYINITIAL>\"" <> text b <> "\"" <+> "count++; yybegin(NCOMMENT);"),
+    ("<NCOMMENT>\"" <> text e <> "\""  <+> "if(--count > 0){}else{yybegin(YYINITIAL);}"),
+    ("<NCOMMENT>."  <+> "")
+  ]
 
 -- | Helper function that escapes characters in strings.
 escapeChars :: String -> String

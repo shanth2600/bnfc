@@ -111,6 +111,7 @@ prelude name = unlines
    "      }",
    "  }",
    "}",
+   "int count = 0;", -- for counting open comment depth
    "#define YY_USER_ACTION update_loc(&yylloc, yytext);",
    "",
    "%}"
@@ -126,7 +127,7 @@ cMacros cf = unlines
   , "DIGIT [0-9]"
   , "IDENT [a-zA-Z0-9'_]"
   , unwords $ concat
-      [ [ "%START YYINITIAL CHAR CHARESC CHAREND STRING ESCAPED" ]
+      [ [ "%START NCOMMENT YYINITIAL CHAR CHARESC CHAREND STRING ESCAPED" ]
       , take (numberOfBlockCommentForms cf) commentStates
       ]
   , "%%"
@@ -209,16 +210,17 @@ restOfFlex cf env = unlines $ concat
 -- lexSingleComment or lexMultiComment on each comment delimiter or pair of
 -- delimiters.
 --
--- >>> lexComments (Just "myns.") ([("{-","-}")],["--"])
+-- >>> lexComments (Just "myns.") ([("{-","-}")],["--"],[])
 -- <YYINITIAL>"--"[^\n]* /* skip */; /* BNFC: comment "--" */
 -- <YYINITIAL>"{-" BEGIN COMMENT; /* BNFC: block comment "{-" "-}" */
 -- <COMMENT>"-}" BEGIN YYINITIAL;
 -- <COMMENT>.    /* skip */;
 -- <COMMENT>[\n] /* skip */;
-lexComments :: Maybe String -> ([(String, String)], [String]) -> Doc
-lexComments _ (m,s) = vcat $ concat
+lexComments :: Maybe String -> ([(String, String)], [String], [(String, String)]) -> Doc
+lexComments _ (m,s,n) = vcat $ concat
   [ map    lexSingleComment s
   , zipWith lexMultiComment m commentStates
+  , map    lexNestedComment n
   ]
 
 -- | If we have several block comments, we need different COMMENT lexing states.
@@ -274,6 +276,14 @@ lexMultiComment (b,e) comment = vcat
     ]
   where
   commentTag = text $ "<" ++ comment ++ ">"
+
+lexNestedComment :: (String, String) -> Doc
+lexNestedComment (b,e) = vcat [
+      ("<YYINITIAL> \"" <> text b <> "\"" <+> ""),
+      ("<YYINITIAL>\"" <> text b <> "\"" <+> "count++; yybegin(NCOMMENT);"),
+      ("<NCOMMENT>\"" <> text e <> "\""  <+> "if(--count > 0){}else{yybegin(YYINITIAL);}"),
+      ("<NCOMMENT>." <+> "")
+    ]
 
 -- | Helper function that escapes characters in strings.
 escapeChars :: String -> String

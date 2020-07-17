@@ -103,8 +103,8 @@ prtOwnToken (name,reg) = unlines
    "```"
   ]
 
-prtComments :: ([(String,String)],[String]) -> String
-prtComments (xs,ys) = concat
+prtComments :: ([(String,String)],[String],[(String, String)]) -> String
+prtComments (xs,ys, zs) = concat
                    [
                    if null ys then
                     "There are no single-line comments in the grammar."
@@ -112,6 +112,8 @@ prtComments (xs,ys) = concat
                     "Single-line comments begin with " ++ sing ++".",
                    if null xs then
                     "There are no multiple-line comments in the grammar."
+                   else if null zs then
+                     "There are no nested comments in the grammar."
                    else
                    "Multiple-line comments are  enclosed with " ++ mult ++"."
                    ]

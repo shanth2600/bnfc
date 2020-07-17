@@ -84,6 +84,7 @@ prelude jflex rp packageBase = vcat
     , nest 2 $ vcat
         [ "String pstring = new String();"
         , "final int unknown = -1;"
+        , "int count = 0" -- for counting open comment depth
         , "ComplexSymbolFactory.Location left = new ComplexSymbolFactory.Location(unknown, unknown);"
         , "ComplexSymbolFactory cf = new ComplexSymbolFactory();"
         , "public SymbolFactory getSymbolFactory() { return cf; }"
@@ -139,6 +140,7 @@ cMacros cf = vcat $ concat
     , "%state CHAREND"
     , "%state STRING"
     , "%state ESCAPED"
+    , "%state NCOMMENT"
     , "%%"
     ]
   ]
@@ -249,10 +251,11 @@ restOfJLex jflex rp cf = vcat
           else ""
         ]
 
-lexComments :: ([(String, String)], [String]) -> Doc
-lexComments (m,s) = vcat $ concat
+lexComments :: ([(String, String)], [String], [(String, String)]) -> Doc
+lexComments (m,s,n) = vcat $ concat
   [ map lexSingleComment s
   , zipWith lexMultiComment m commentStates
+  , map lexNestedComment n
   ]
 
 -- | Create lexer rule for single-line comments.
@@ -293,3 +296,11 @@ lexMultiComment (b,e) comment = vcat
     ]
   where
   commentTag = text $ "<" ++ comment ++ ">"
+
+lexNestedComment :: (String, String) -> Doc
+lexNestedComment (b,e) = vcat [
+      ("<YYINITIAL> \"" <> text b <> "\"" <+> ""),
+      ("<YYINITIAL>\"" <> text b <> "\"" <+> "count++; yybegin(NCOMMENT);"),
+      ("<NCOMMENT>\"" <> text e <> "\""  <+> "if(--count > 0){}else{yybegin(YYINITIAL);}"),
+      ("<NCOMMENT>." <+> "")
+    ]

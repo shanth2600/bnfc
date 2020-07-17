@@ -129,7 +129,7 @@ import ParBNF (pCat)
 import LexBNF (tokens)
 import qualified AbsBNF
 
-import BNFC.Utils (prParenth,(+++))
+import BNFC.Utils (prParenth,(+++), fst3, snd3, thd3)
 
 -- | A context free grammar consists of a set of rules and some extended
 -- information (e.g. pragmas, literals, symbols, keywords).
@@ -255,6 +255,7 @@ instance Show Exp where
 
 data Pragma = CommentS  String -- ^ for single line comments
             | CommentM (String,String) -- ^  for multiple-line comments.
+            | CommentN (String,String) -- ^  for nested comments.
             | TokenReg String Bool Reg -- ^ for tokens
             | EntryPoints [Cat]
             | Layout [String]
@@ -480,6 +481,7 @@ commentPragmas :: [Pragma] -> [Pragma]
 commentPragmas = filter isComment
  where isComment (CommentS _) = True
        isComment (CommentM _) = True
+       isComment (CommentN _) = True
        isComment _            = False
 
 lookupRule :: Eq f => f -> [Rul f] -> Maybe (Cat, SentForm)
@@ -564,14 +566,14 @@ cfTokens cf = zip (sort (cfgSymbols cf ++ reservedWords cf)) [1..]
 -- NOTE: some backends (incl. Haskell) assume that this list is sorted.
 
 -- | Comments can be defined by the 'comment' pragma
-comments :: CF -> ([(String,String)],[String])
-comments cf = ([p | CommentM p <- xs], [s | CommentS s <- xs])
+comments :: CF -> ([(String,String)],[String],[(String,String)])
+comments cf = ([p | CommentM p <- xs], [s | CommentS s <- xs], [n | CommentN n <- xs])
   where
   xs = commentPragmas (cfgPragmas cf)
 
 -- | Number of block comment forms defined in the grammar file.
 numberOfBlockCommentForms :: CF -> Int
-numberOfBlockCommentForms = length . fst . comments
+numberOfBlockCommentForms = length . fst3 . comments
 
 
 -- built-in categories (corresponds to lexer)

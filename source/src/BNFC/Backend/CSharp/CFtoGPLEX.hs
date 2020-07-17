@@ -123,6 +123,7 @@ prelude namespace = unlines [
   "        {",
   "          this.strBuffer = new System.Text.StringBuilder();",
   "        }",
+  "        int count = 0;",
   "",
   "%}",
   ""
@@ -141,6 +142,7 @@ cMacros = unlines
   -- start states, must be defined one at a time
   "%s YYINITIAL",
   "%s COMMENT",
+  "%s NCOMMENT",
   "%s CHAR",
   "%s CHARESC",
   "%s CHAREND",
@@ -199,8 +201,8 @@ gplex namespace cf env = concat [
      ("<CHAREND>\"'\""   , "BEGIN(YYINITIAL);")
      ]
 
-lexComments :: ([(String, String)], [String]) -> [(String, String)]
-lexComments (m,s) = (map lexSingleComment s) ++ (concatMap lexMultiComment m)
+lexComments :: ([(String, String)], [String], [(String, String)]) -> [(String, String)]
+lexComments (m,s,n) = (map lexSingleComment s) ++ (concatMap lexMultiComment m) ++ (concatMap lexNestedComment n)
 
 lexSingleComment :: String -> (String, String)
 lexSingleComment c =
@@ -211,10 +213,17 @@ lexSingleComment c =
 --However this seems rare.
 lexMultiComment :: (String, String) -> [(String, String)]
 lexMultiComment (b,e) = [
-  ("<YYINITIAL>\"" ++ b ++ "\"" , "BEGIN(COMMENT);"),
-  ("<COMMENT>\"" ++ e ++ "\""   , "BEGIN(YYINITIAL);"),
-  ("<COMMENT>."                 , "/* BNFC multi-line comment */;"),
-  ("<COMMENT>[\\n]"             , "/* BNFC multi-line comment */;")
+    ("<YYINITIAL>\"" ++ b ++ "\"" , "BEGIN(COMMENT);"),
+    ("<COMMENT>\"" ++ e ++ "\""   , "BEGIN(YYINITIAL);"),
+    ("<COMMENT>."                 , "/* BNFC multi-line comment */;"),
+    ("<COMMENT>[\\n]"             , "/* BNFC multi-line comment */;")
+  ]
+  
+lexNestedComment :: (String, String) -> [(String, String)] 
+lexNestedComment (b,e) = [
+    ("<YYINITIAL>\"" ++ b ++ "\"" , "count++; yybegin(NCOMMENT);"),
+    ("<NCOMMENT>\"" ++ e ++ "\""  , "if(--count > 0){}else{yybegin(YYINITIAL);}"),
+    ("<NCOMMENT>."  , "")
   ]
 
 -- Used to print the lexer rules; makes sure that all rules are equally indented, to make the GPLEX file a little more readable.

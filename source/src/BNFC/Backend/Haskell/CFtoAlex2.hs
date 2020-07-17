@@ -223,9 +223,9 @@ restOfAlex _ shareStrings tokenText cf = [
 
    ifC :: TokenCat -> String -> String
    ifC cat s = if isUsedCat cf (TokenCat cat) then s else ""
-   lexComments ([],[])           = []
-   lexComments (xs,s1:ys) = '\"' : s1 ++ "\"" ++ " [.]* ; -- Toss single line comments\n" ++ lexComments (xs, ys)
-   lexComments (([l1,l2],[r1,r2]):xs,[]) = concat
+   lexComments ([],[], [])           = []
+   lexComments (xs,s1:ys, zs) = '\"' : s1 ++ "\"" ++ " [.]* ; -- Toss single line comments\n" ++ lexComments (xs, ys, zs)
+   lexComments (([l1,l2],[r1,r2]):xs,[], []) = concat
                                         [
                                         '\"':l1:l2:"\" ([$u # \\", -- FIXME quotes or escape?
                                         r1:"] | \\",
@@ -234,9 +234,9 @@ restOfAlex _ shareStrings tokenText cf = [
                                         r2:"]])* (\"",
                                         r1:"\")+ \"",
                                         r2:"\" ; \n",
-                                        lexComments (xs, [])
+                                        lexComments (xs, [], [])
                                         ]
-   lexComments (_:xs,[]) = lexComments (xs,[])
+   lexComments (_:xs,[], []) = lexComments (xs,[], [])
 ---   lexComments (xs,(_:ys)) = lexComments (xs,ys)
 
    -- tokens consisting of special symbols

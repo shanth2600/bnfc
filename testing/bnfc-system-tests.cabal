@@ -68,11 +68,11 @@ executable bnfc-system-tests
   build-depends:       base >=4.5 && <5,
                        regex-posix >= 0.95.2,
                        HUnit >= 1.2,
-                       shelly >= 1.9,
+                       shelly >= 1.8,
                        filepath,
    -- filepath >= 1.4.2.1,
                        text,
-                       HTF >= 0.14.0.1
+                       HTF >= 0.13.0.1
 
   -- Directories containing source files.
   hs-source-dirs: . src

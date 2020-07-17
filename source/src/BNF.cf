@@ -85,6 +85,7 @@ terminator nonempty ProfItem "" ;
 -- Pragmas
 Comment  .  Def ::= "comment"  String                     ; -- Line comment
 Comments .  Def ::= "comment"  String String              ; -- Block comment
+CommentN .  Def ::= "nested comment"  String String              ; -- Nested comment
 Internal .  Def ::= "internal" Label "." Cat "::=" [Item] ; -- No parsing, AST and printing only
 Token.      Def ::=            "token" Identifier Reg     ; -- Lexer token
 PosToken.   Def ::= "position" "token" Identifier Reg     ; -- Lexer token with position info

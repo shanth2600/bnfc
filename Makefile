@@ -11,6 +11,6 @@ internal-tests :
 	make -C source test
 
 test :
-	cd testing && cabal install && bnfc-system-tests && cd ..
+	cd testing && cabal install &&  cd ..
 
 #EOF

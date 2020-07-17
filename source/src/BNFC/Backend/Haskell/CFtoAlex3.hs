@@ -272,13 +272,15 @@ restOfAlex _ shareStrings tokenText cf = [
    lexComments
      :: ( [(String, String)]  -- block comment delimiters
         , [String]            -- line  comment initiators
+        , [(String, String)] 
         ) -> String           -- Alex declarations
-   lexComments (block, line) = unlines $ concat $
+   lexComments (block, line, nested) = unlines $ concat $
      [ [ "-- Line comments"  | not (null line)               ]
      , map lexLineComment line
      , [ ""                  | not (null line || null block) ]
      , [ "-- Block comments" | not (null block)              ]
      , map (uncurry lexBlockComment) block
+     , [ "-- Nested comments" | not (null nested)]
      ]
 
    lexLineComment

@@ -29,6 +29,7 @@ transDef x = case x of
   AbsBNF.Rule label cat items -> failure x
   AbsBNF.Comment string -> failure x
   AbsBNF.Comments string1 string2 -> failure x
+  AbsBNF.CommentN string1 string2 -> failure x
   AbsBNF.Internal label cat items -> failure x
   AbsBNF.Token identifier reg -> failure x
   AbsBNF.PosToken identifier reg -> failure x

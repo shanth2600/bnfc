@@ -1,4 +1,4 @@
 test:
-	cabal install --allow-newer && bnfc-system-tests
+	cabal install --allow-newer
 
 # EOF

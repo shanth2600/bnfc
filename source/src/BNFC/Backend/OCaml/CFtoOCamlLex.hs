@@ -152,7 +152,8 @@ mkRule _ [] = empty
 mkRule entrypoint (r1:rn) = vcat
     [ "rule" <+> entrypoint <+> "="
     , nest 2 $ hang "parse" 4 $ vcat
-        (nest 2 (mkOne r1):map (("|" <+>) . mkOne) rn) ]
+        (nest 2 (mkOne r1):map (("|" <+>) . mkOne) rn)]
+        -- (nest 2 "and x =" <> "1" )]
   where
     mkOne (regex, action) = regex <+> braces action
 
@@ -211,7 +212,7 @@ rules cf = mkRule "token" $
     , ( "eof", "TOK_EOF" )
     ]
   where
-    (multilineC, singleLineC) = comments cf
+    (multilineC, singleLineC, nestedC) = comments cf
     tokenAction t = case reservedWords cf of
         [] -> "let l = lexeme lexbuf in TOK_" <> t <>" l"
         _  -> "let l = lexeme lexbuf in try Hashtbl.find resword_table l with Not_found -> TOK_" <> t <+> "l"

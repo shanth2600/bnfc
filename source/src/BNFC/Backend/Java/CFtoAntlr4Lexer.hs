@@ -165,9 +165,9 @@ restOfLexerGrammar cf = vcat
         , "CHARENDC     :  '\\''  -> type(CHAR), mode(DEFAULT_MODE);"
         ]
 
-lexComments :: ([(String, String)], [String]) -> Doc
-lexComments ([],[]) = ""
-lexComments (m,s) = vcat
+lexComments :: ([(String, String)], [String],[(String, String)]) -> Doc
+lexComments ([],[], _) = ""
+lexComments (m,s, _) = vcat
     (prod "COMMENT_antlr_builtin" lexSingleComment s ++
          prod "MULTICOMMENT_antlr_builtin" lexMultiComment m )
 

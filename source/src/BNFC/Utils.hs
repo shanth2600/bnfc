@@ -36,6 +36,7 @@ module BNFC.Utils
     , writeFileRep
     , cstring, cchar
     , getZonedTimeTruncatedToSeconds
+    , fst3, snd3, thd3,
     ) where
 
 import Control.Arrow   ((&&&))
@@ -462,3 +463,8 @@ cstring = text . show
 -- '\''
 cchar :: Char -> Doc
 cchar = text . show
+
+-- 3-tuple accessor functions
+fst3 (x, _, _) = x
+snd3 (_, x, _) = x
+thd3 (_, _, x) = x

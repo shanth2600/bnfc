@@ -155,8 +155,8 @@ prtOwnToken (name,reg) = unlines
    "\\)"
   ]
 
-prtComments :: ([(String,String)],[String]) -> String
-prtComments (xs,ys) =
+prtComments :: ([(String,String)],[String],[(String, String)]) -> String
+prtComments (xs,ys,zs) =
     (if null ys
         then "There are no single-line comments in the grammar. \\\\"
         else "Single-line comments begin with " ++ sing ++". \\\\")
@@ -164,11 +164,17 @@ prtComments (xs,ys) =
     (if null xs
         then "There are no multiple-line comments in the grammar."
         else "Multiple-line comments are  enclosed with " ++ mult ++".")
+    ++ 
+    (if null zs
+        then "There are no nested comments in the grammar."
+        else "Nested comments are  enclosed with " ++ mult ++".")
  where
  sing = intercalate ", " $ map (symbol.prt) ys
- mult = intercalate ", " $
-         map (\(x,y) -> symbol (prt x)
-                       ++ " and " ++
+ mult = prntSymbs xs
+ nested = prntSymbs zs
+ prntSymbs xs = intercalate ", " $
+   map (\(x,y) -> symbol (prt x)
+                        ++ " and " ++
                       symbol (prt y)) xs
 
 prtSymb :: String -> CF -> String

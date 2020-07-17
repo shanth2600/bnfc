@@ -137,6 +137,7 @@ instance Print AbsBNF.Def where
     AbsBNF.Rule label cat items -> prPrec i 0 (concatD [prt 0 label, doc (showString "."), prt 0 cat, doc (showString "::="), prt 0 items])
     AbsBNF.Comment str -> prPrec i 0 (concatD [doc (showString "comment"), prt 0 str])
     AbsBNF.Comments str1 str2 -> prPrec i 0 (concatD [doc (showString "comment"), prt 0 str1, prt 0 str2])
+    AbsBNF.CommentN str1 str2 -> prPrec i 0 (concatD [doc (showString "nested"), doc (showString "comment"), prt 0 str1, prt 0 str2])
     AbsBNF.Internal label cat items -> prPrec i 0 (concatD [doc (showString "internal"), prt 0 label, doc (showString "."), prt 0 cat, doc (showString "::="), prt 0 items])
     AbsBNF.Token identifier reg -> prPrec i 0 (concatD [doc (showString "token"), prt 0 identifier, prt 0 reg])
     AbsBNF.PosToken identifier reg -> prPrec i 0 (concatD [doc (showString "position"), doc (showString "token"), prt 0 identifier, prt 0 reg])

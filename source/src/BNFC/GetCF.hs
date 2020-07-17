@@ -254,6 +254,7 @@ transDef = \case
    [Right $ Rule (transLabel label) (transCat cat) (concatMap transItem items) Parsable]
  Abs.Comment str               -> [Left $ CommentS str]
  Abs.Comments str0 str         -> [Left $ CommentM (str0,str)]
+ Abs.CommentN str0 str          -> [Left $ CommentN (str0,str)]
  Abs.Token ident reg           -> [Left $ TokenReg (transIdent ident) False $ simpReg reg]
  Abs.PosToken ident reg        -> [Left $ TokenReg (transIdent ident) True  $ simpReg reg]
  Abs.Entryp idents             -> [Left $ EntryPoints (map (strToCat .transIdent) idents)]

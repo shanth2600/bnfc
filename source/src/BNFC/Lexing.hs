@@ -12,7 +12,7 @@ import AbsBNF        ( Reg(..)   )
 import PrintBNF      ( printTree )  -- for debug printing
 import BNFC.CF
 import BNFC.Regex    ( simpReg )
-import BNFC.Utils    ( unless  )
+import BNFC.Utils    ( unless, fst3, snd3, thd3 )
 
 debugPrint :: Reg -> IO ()
 debugPrint = putStrLn . concat . words . printTree
@@ -24,8 +24,8 @@ data LexType = LexComment | LexToken String | LexSymbols
 mkLexer :: CF -> [(Reg, LexType)]
 mkLexer cf = concat
     -- comments
-  [ [ (mkRegSingleLineComment s, LexComment) | s <- snd (comments cf) ]
-  , [ (mkRegMultilineComment b e, LexComment) | (b,e) <- fst (comments cf) ]
+  [ [ (mkRegSingleLineComment s, LexComment) | s <- snd3 (comments cf) ]
+  , [ (mkRegMultilineComment b e, LexComment) | (b,e) <- fst3 (comments cf) ]
     -- user tokens
   , [ (reg, LexToken name) | (name, reg) <- tokenPragmas cf]
     -- predefined tokens

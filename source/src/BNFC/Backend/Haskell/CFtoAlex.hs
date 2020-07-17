@@ -154,9 +154,10 @@ restOfAlex cf = [
  where
    ifC :: TokenCat -> String -> String
    ifC cat s = if isUsedCat cf (TokenCat cat) then s else ""
-   lexComments ([],[])           = []
-   lexComments (xs,s1:ys) = "<>         ::= " ++ ('^':intersperse '^' s1) ++ " [.]* ^n\n" ++ lexComments (xs,ys)
-   lexComments (([l1,l2],[r1,r2]):xs,[]) = concat
+   lexComments :: ([(String, String)], [String], [(String, String)]) -> String
+   lexComments ([],[], [])           = []
+   lexComments (xs,s1:ys, zs) = "<>         ::= " ++ ('^':intersperse '^' s1) ++ " [.]* ^n\n" ++ lexComments (xs,ys,zs)
+   lexComments (([l1,l2],[r1,r2]):xs,[], []) = concat
                                         [
                                         "<>         ::= ",
                                         '^':l1:' ':'^':l2:" ([^u # ^",
@@ -165,9 +166,9 @@ restOfAlex cf = [
                                         r2:"])* (^",
                                         r1:")+ ^",
                                         r2:"\n",
-                                        lexComments (xs,[])
+                                        lexComments (xs,[], [])
                                         ]
-   lexComments (_ : xs, []) = lexComments (xs,[])
+   lexComments (_ : xs, [], []) = lexComments (xs,[], [])
 ---   lexComments (xs,(_:ys)) = lexComments (xs,ys)
    pTSpec ([],[]) = ""
    pTSpec xp =
